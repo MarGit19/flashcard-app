@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
-import { readDeck, createCard } from '../utils/api/index';
-import CardForm from '../components/CardForm';
+import React , {useEffect , useState} from "react";
+import { useParams, Link, Switch , Route , useHistory } from "react-router-dom";
+import { readDeck, deleteDeck, createCard } from "../utils/api";
+import CardForm from "../components/CardForm";
 
 function AddCard() {
   const { deckId } = useParams();

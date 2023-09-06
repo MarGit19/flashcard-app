@@ -1,58 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
-import { readDeck, readCard, updateCard } from '../utils/api/index';
-import CardForm from './CardForm';
+import React , {useEffect , useState} from "react";
+import { useParams , Link , Switch , Route , useHistory } from "react-router-dom";
+import { readDeck , readCard, updateCard } from "../utils/api";
+import CardForm from "../components/CardForm";
 
-
-function EditCard() {
-  const { deckId, cardId } = useParams();
+const EditCard = () => {
+  const {deckId , cardId } = useParams();
+  const [deck , setDeck] = useState({});
+  const [front , setFront] = useState("");
+  const [back , setBack] = useState("");
   const history = useHistory();
-  const [deck, setDeck] = useState({ name: '' });
-  const [card, setCard] = useState({ front: '', back: '' });
+  const [card , setCard] = useState({});
 
-  // Load the deck and card
+  const getDeck = async () => {
+    const data = await readDeck(deckId);
+    console.log(data)
+    setDeck(data);
+  }
+  const getCard = async () => {
+    const data = await readCard(cardId);
+    console.log(data)
+    setCard(data);
+    setFront(data.front);
+    setBack(data.back);
+  }
+
   useEffect(() => {
-    readDeck(deckId).then(setDeck);
-    readCard(cardId).then(setCard);
-  }, [deckId, cardId]);
+    getDeck();
+    getCard();
+  }, [deckId])
 
-  const handleChange = (event) => {
-    setCard({
-      ...card,
-      [event.target.name]: event.target.value,
-    });
-  };
+  return <div>
+  <Link to="/">Home</Link>
+      /
+      <Link to={`/decks/${deck.id}`}> {deck.name} </Link>
+      / Edit Card {cardId}
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    updateCard(card).then(() => {
-      history.push(`/decks/${deckId}`);
-    });
-  };
-
-  const handleCancel = () => {
-    history.push(`/decks/${deckId}`);
-  };
-
-  return (
-    <div>
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="breadcrumb-item">
-            <Link to={`/decks/${deckId}`}>{deck.name}</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            Edit Card {cardId}
-          </li>
-        </ol>
-      </nav>
       <h1>Edit Card</h1>
-      <CardForm card={card} handleSubmit={handleSubmit} handleChange={handleChange} />
-    </div>
-  );
+    <CardForm onSubmit={async (e)=>{
+      e.preventDefault()
+      console.log({front,back,id:card.id, deckId})
+       await updateCard({front , back , id:card.id, deckId:Number(deckId)});
+       history.push(`/decks/${deck.id}`)
+      }} front = {front} setFront={setFront} back = {back} setBack = {setBack}>
+          <button onClick= {()=> history.push(`/decks/${deck.id}`)}>Cancel</button>
+          <button > Submit </button>
+      </CardForm>
+  </div>
 }
 
 export default EditCard;

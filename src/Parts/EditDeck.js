@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { readDeck, updateDeck } from '../utils/api/index';
+import { readDeck, updateDeck } from '../utils/api';
 import classNames from '../utils/class-names/index';
 
 

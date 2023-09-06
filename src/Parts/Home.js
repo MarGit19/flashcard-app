@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listDecks, deleteDeck } from '../utils/api/index';
+import { listDecks, deleteDeck } from '../utils/api';
 import classNames from '../utils/class-names/index';
 
 function Home() {

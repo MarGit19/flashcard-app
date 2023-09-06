@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { listDecks, deleteDeck } from "../utils/api/index";
-import { readDeck, createCard } from "../utils/api/index";
+import { listDecks, deleteDeck } from "../utils/api";
+import { readDeck, createCard } from "../utils/api";
 
 
 function Deck() {
