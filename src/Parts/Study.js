@@ -1,102 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React , {useEffect , useState} from "react";
+import { useParams , Link , Switch , Route , useHistory } from "react-router-dom";
 import { readDeck , deleteDeck } from "../utils/api";
-import Study from "./Study";
 
-function Study() {
-  const { deckId } = useParams();
-  const [deck, setDeck] = useState(null);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
+const Study = () => {
+  const {deckId} = useParams();
+  const [deck , setDeck] = useState({});
+  const [card , setCard] = useState({});
+  const [cardSide , setCardSide] = useState(1);
+  const [cardIndex , setCardIndex] = useState(0);
+  const [cards , setCards] = useState([]);
+  const history = useHistory();
+
+  const getDeck = async () => {
+    const data = await readDeck(deckId);
+    console.log(data)
+    setDeck(data);
+    setCard(data.cards[cardIndex]);
+    setCardIndex(cardIndex + 1)
+    setCards(data.cards);
+  }
 
   useEffect(() => {
-    readDeck(deckId).then((data) => setDeck(data));
-  }, [deckId]);
+    getDeck();
+  }, [deckId])
 
-  const toggleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
-
-  const nextCard = () => {
-    if (currentCardIndex < deck.cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-      setIsFlipped(false);
-    } else {
-      const restart = window.confirm(
-        'Restart the deck? Click "Cancel" to return to the home screen.'
-      );
-      if (restart) {
-        setCurrentCardIndex(0);
-        setIsFlipped(false);
-      } else {
-        window.location.href = '/';
-      }
-    }
-  };
-
-  const displayCard = () => {
-    if (deck.cards.length <= 2) {
-      return (
+  return <div>
+    <Link to="/">Home</Link>
+      /
+      <Link to={`/decks/${deck.id}`}>{deck.name}</Link>
+      / Study
+      <h1>{deck.name}: Study</h1>
+      <h1>Cards</h1>
         <div>
-          <h2>Not enough cards.</h2>
-          <p>
-            You need at least 3 cards to study.{' '}
-            <Link to={`/decks/${deckId}/cards/new`} className="btn btn-primary">
-              Add Cards
-            </Link>
-          </p>
+          {cards.length <= 2 ? <div>
+            <p>Not Enough Cards</p>
+            <button onClick= {()=> history.push(`/decks/${deck.id}/cards/new`)}>Add card</button> </div> :
+          cardSide == 1 ? <div>
+            <h1>Card {cardIndex} of {cards.length}</h1>
+            <p>{card?.front}</p>
+            <button onClick={()=>setCardSide(2)}>Flip</button>
+          </div>:<div>
+          <h1>Card {cardIndex} of {cards.length}</h1>
+            <p>{card?.back}</p>
+            <button onClick={()=>setCardSide(1)}>Flip</button>
+            <button onClick={()=>{
+              if(cardIndex >= deck.cards.length){
+                const result = window.confirm("Restart cards?")
+                if(result == true){
+                  setCard(deck.cards[0]);
+                  setCardSide(1)
+                  setCardIndex(1)
+                } else{history.push("/")}
+              } else {
+                  setCard(deck.cards[cardIndex])
+                  setCardSide(1)
+                  setCardIndex(cardIndex + 1)
+              }
+            }}>Next</button>
+            </div>}
         </div>
-      );
-    }
-
-    const card = deck.cards[currentCardIndex];
-
-    return (
-      <div>
-        <h2>Card {currentCardIndex + 1} of {deck.cards.length}</h2>
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">
-              {isFlipped ? 'Back' : 'Front'}
-            </h5>
-            <p className="card-text">
-              {isFlipped ? card.back : card.front}
-            </p>
-            <button className="btn btn-secondary" onClick={toggleFlip}>
-              Flip
-            </button>
-            {isFlipped && (
-              <button className="btn btn-primary" onClick={nextCard}>
-                Next
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  if (!deck) return null;
-
-  return (
-    <div>
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            {deck.name}
-          </li>
-          <li className="breadcrumb-item active" aria-current="page">
-            Study
-          </li>
-        </ol>
-      </nav>
-      <h1>Study: {deck.name}</h1>
-      {displayCard()}
-    </div>
-  );
+  </div>
 }
 
 export default Study;
