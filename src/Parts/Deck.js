@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { listDecks, deleteDeck } from "../utils/api";
-import { readDeck, createCard } from "../utils/api";
+import { readDeck, createCard, deleteCard } from "../utils/api";
 
 
 function Deck() {
@@ -20,7 +20,21 @@ function Deck() {
         history.push('/');
       });
     }
+
   };
+
+  async function handleDeleteCard(card) {
+    const abortController = new AbortController();
+    try {
+        history.go(0);
+        return await deleteCard(card.id, abortController.signal);
+    } catch (error) {
+        console.error("Something went wrong", error);
+    }
+    return () => {
+        abortController.abort();
+    };
+}
 
   return (
     <div>
@@ -67,7 +81,16 @@ function Deck() {
                   className="btn btn-danger"
                   onClick={() => {
                     if (window.confirm('Are you sure you want to delete this card?')) {
-                      // Handle card deletion here
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this card?')) {
+                      handleDeleteCard(card)
+                    }
+                  }}
+                >
+                  Delete
+                </button>
                     }
                   }}
                 >
